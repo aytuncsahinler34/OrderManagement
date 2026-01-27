@@ -9,7 +9,7 @@ services:
       - "15672:15672" # Management UI (Web arayüz)
     environment:
       RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_PASS: Qweasdzxc123
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     networks:
