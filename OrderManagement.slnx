@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="src/OrderManagement.API/OrderManagement.API.csproj" />
+  <Project Path="src/OrderManagement.Core/OrderManagement.Core.csproj" />
+  <Project Path="src/OrderManagement.Infrastructure/OrderManagement.Infrastructure.csproj" />
+  <Project Path="src/OrderManagement.WorkerService/OrderManagement.WorkerService.csproj" />
+  <Project Path="test/OrderManagement.Tests/OrderManagement.Tests.csproj" />
+</Solution>
