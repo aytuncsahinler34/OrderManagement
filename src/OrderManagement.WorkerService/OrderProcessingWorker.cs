@@ -1,4 +1,4 @@
-﻿using System.Text;
+﻿using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using OrderManagement.Core.Entities;
 using OrderManagement.Core.Enums;
@@ -6,6 +6,7 @@ using OrderManagement.Core.Interfaces;
 using OrderManagement.WorkerService.Configuration;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using System.Text;
 
 namespace OrderManagement.WorkerService;
 
@@ -21,12 +22,18 @@ public class OrderProcessingWorker : BackgroundService
     public OrderProcessingWorker(
         ILogger<OrderProcessingWorker> logger,
         IServiceProvider serviceProvider,
-        RabbitMQOptions options)
+        IOptions<RabbitMQOptions> options)
     {
         _logger = logger;
         _serviceProvider = serviceProvider;
+        _options = options.Value;
+
+        if (_options == null)
+        {
+            _logger.LogError("RabbitMQ configuration bulunamadı!");
+            throw new InvalidOperationException("RabbitMQ configuration is missing");
+        }
         InitializeRabbitMQ();
-        _options = options;
     }
 
     private void InitializeRabbitMQ()
