@@ -1,263 +1,138 @@
-# Sipariş Yönetim Sistemi (Order Management System)
+Sipariş Yönetim Sistemi 
 
-E-ticaret platformu için geliştirilmiş modern bir sipariş yönetim backend servisi. .NET 9, RabbitMQ ve Clean Architecture prensiplerine dayalı olarak tasarlanmıştır.
+Modern e-ticaret platformları için geliştirilmiş, ölçeklenebilir bir sipariş yönetim backend servisi. Clean Architecture prensipleri ve asenkron mesajlaşma ile tasarlanmıştır. 
 
-## 📋 Özellikler
+Teknoloji Stack 
 
-- ✅ RESTful API ile sipariş yönetimi
-- ✅ RabbitMQ ile asenkron mesaj kuyruğu
-- ✅ Background Worker Service ile sipariş işleme
-- ✅ In-Memory Database (Entity Framework Core)
-- ✅ Clean Architecture yapısı
-- ✅ Comprehensive Unit Tests
-- ✅ Swagger/OpenAPI dokümantasyonu
+.NET 9.0 
 
-## 🏗️ Mimari
+Entity Framework Core (In-Memory) 
 
-Proje Clean Architecture prensiplerine uygun olarak katmanlara ayrılmıştır:
+RabbitMQ 
 
-```
-OrderManagementSystem/
-├── src/
-│   ├── OrderManagement.Core/          # Domain katmanı (Entities, Interfaces)
-│   ├── OrderManagement.Infrastructure/ # Veritabanı ve Messaging implementasyonları
-│   ├── OrderManagement.API/           # REST API endpoints
-│   └── OrderManagement.WorkerService/ # Background Service (RabbitMQ Consumer)
-└── tests/
-    └── OrderManagement.Tests/         # Unit testler
-```
+xUnit & Moq 
 
-## 🛠️ Teknolojiler
+Mimari Yapı 
 
-- **.NET 9.0** - Framework
-- **Entity Framework Core InMemory** - Veritabanı
-- **RabbitMQ** - Message Queue
-- **Swagger** - API Dokümantasyonu
-- **xUnit** - Unit Testing
-- **Moq** - Mocking Framework
+Proje, katmanlı mimari prensiplerine uygun şekilde organize edilmiştir: 
 
-## 📦 Kurulum
+├── OrderManagement.Core # Domain katmanı ├── OrderManagement.Infrastructure # Data access ve messaging ├── OrderManagement.API # REST API ├── OrderManagement.WorkerService # Background processing └── OrderManagement.Tests # Unit tests  
 
-### Gereksinimler
+Tasarım Kararları 
 
-- .NET 9.0 SDK veya üzeri
-- Docker ve Docker Compose (RabbitMQ için)
+Neden Clean Architecture? Katmanlar arası bağımlılıkları minimize ederek, değişime açık ve test edilebilir bir yapı oluşturmak istedim. Core katmanı hiçbir external dependency içermiyor. 
 
-### Adım 1: RabbitMQ'yu Başlatın
+Neden RabbitMQ? Sipariş işleme süreçlerini asenkron hale getirerek sistem performansını artırmak ve servisler arası bağımlılığı azaltmak için message queue kullandım. 
 
-```bash
-# Docker Compose ile RabbitMQ'yu başlatın
-docker-compose up -d
+Neden Guid ID? Distributed sistemlerde ID çakışmalarını önlemek ve database bağımlılığını azaltmak için Guid tercih ettim. Bu sayede client-side ID generation mümkün oluyor. 
 
-# RabbitMQ Management UI: http://localhost:15672
-# Kullanıcı adı: guest
-# Şifre: guest
-```
+Kurulum 
 
-### Adım 2: Projeyi Derleyin
+Gereksinimler 
 
-```bash
-# Solution'ı restore edin ve derleyin
-dotnet restore
-dotnet build
-```
+.NET 9.0 SDK 
 
-### Adım 3: Uygulamaları Başlatın
+Docker Desktop 
 
-**Terminal 1 - API'yi başlatın:**
-```bash
-cd src/OrderManagement.API
-dotnet run
-```
+RabbitMQ Başlatma 
 
-API şu adreste çalışacaktır: `http://localhost:5000` veya `https://localhost:5001`
+docker-compose up -d  
 
-Swagger UI: `http://localhost:5000/swagger`
+RabbitMQ Management: http://localhost:15672 (guest/guest) 
 
-**Terminal 2 - Worker Service'i başlatın:**
-```bash
-cd src/OrderManagement.WorkerService
-dotnet run
-```
+Uygulamayı Çalıştırma 
 
-Worker Service arka planda RabbitMQ kuyruğunu dinleyecektir.
+API: 
 
-## 🚀 API Kullanımı
+cd src/OrderManagement.API dotnet run  
 
-### Endpoints
+Worker Service: 
 
-#### 1. Yeni Sipariş Oluştur
-```http
-POST /api/orders
-Content-Type: application/json
+cd src/OrderManagement.WorkerService dotnet run  
 
-{
-  "productName": "Laptop",
-  "price": 15999.99
-}
-```
+(http)  API: http://localhost:5131 | Swagger: http://localhost:5131/swagger   
+(https)  API: https://localhost:7186 | Swagger: https://localhost:7186/swagger 
+API Endpoints 
 
-**Yanıt:**
-```json
-{
-  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "productName": "Laptop",
-  "price": 15999.99,
-  "status": "Pending",
-  "createdDate": "2024-01-20T10:30:00Z",
-  "updatedDate": null
-}
-```
+Method 
 
-#### 2. Sipariş Detayını Getir
-```http
-GET /api/orders/{id}
-```
+Endpoint 
 
-**Yanıt:**
-```json
-{
-  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "productName": "Laptop",
-  "price": 15999.99,
-  "status": "Completed",
-  "createdDate": "2024-01-20T10:30:00Z",
-  "updatedDate": "2024-01-20T10:30:05Z"
-}
-```
+Açıklama 
 
-#### 3. Tüm Siparişleri Listele
-```http
-GET /api/orders
-```
+POST 
 
-**Yanıt:**
-```json
-[
-  {
-    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-    "productName": "Laptop",
-    "price": 15999.99,
-    "status": "Completed",
-    "createdDate": "2024-01-20T10:30:00Z",
-    "updatedDate": "2024-01-20T10:30:05Z"
-  }
-]
-```
+/api/orders 
 
-### Sipariş Durumları
+Yeni sipariş oluşturur 
 
-- **Pending**: Sipariş oluşturuldu, işleme alınmayı bekliyor
-- **Processing**: Sipariş işleniyor
-- **Completed**: Sipariş başarıyla tamamlandı
-- **Cancelled**: Sipariş iptal edildi
+GET 
 
-## 🔄 İş Akışı
+/api/orders/{id} 
 
-1. **Sipariş Oluşturma**: Kullanıcı `POST /api/orders` endpoint'ine istek gönderir
-2. **Veritabanına Kayıt**: Sipariş `Pending` statüsünde veritabanına kaydedilir
-3. **RabbitMQ'ya Gönderim**: Sipariş bilgisi RabbitMQ kuyruğuna publish edilir
-4. **Arka Plan İşleme**: Worker Service mesajı alır ve siparişi işler
-5. **Durum Güncelleme**: Sipariş durumu `Processing` → `Completed` olarak güncellenir
+Sipariş detayını getirir 
 
-## 🧪 Testleri Çalıştırma
+GET 
 
-```bash
-# Tüm testleri çalıştır
-dotnet test
+/api/orders 
 
-# Detaylı çıktı ile çalıştır
-dotnet test --logger "console;verbosity=detailed"
+Tüm siparişleri listeler 
 
-# Belirli bir test projesini çalıştır
-dotnet test tests/OrderManagement.Tests/OrderManagement.Tests.csproj
-```
+Örnek Request 
 
-### Test Kapsamı
+curl -X POST http://localhost:5131/api/orders \ -H "Content-Type: application/json" \ -d '{"productName":"Laptop","price":15999.99}'  
 
-- **OrderRepositoryTests**: Repository katmanı testleri
-  - CRUD operasyonları
-  - Veritabanı işlemleri
-  
-- **OrdersControllerTests**: Controller katmanı testleri
-  - API endpoint testleri
-  - Mock nesnelerle izolasyon
+Sipariş İşlem Akışı 
 
-## 📊 RabbitMQ Management
+Client, API'ye POST isteği gönderir 
 
-RabbitMQ Management UI'a erişim:
-- URL: http://localhost:15672
-- Kullanıcı: `guest`
-- Şifre: `guest`
+Order entity oluşturulur (Status: Pending) 
 
-Burada şunları görebilirsiniz:
-- Queue istatistikleri
-- Message flow
-- Connection bilgileri
+Database'e kaydedilir 
 
-## 🔧 Yapılandırma
+RabbitMQ kuyruğuna publish edilir 
 
-### API Configuration (appsettings.json)
-```json
-{
-  "RabbitMQ": {
-    "Host": "localhost",
-    "Port": 5672,
-    "Username": "guest",
-    "Password": "guest"
-  }
-}
-```
+Worker Service mesajı consume eder 
 
-### Worker Service Configuration
-Worker Service aynı yapılandırma dosyasını kullanır.
+Sipariş işlenir (Status: Processing → Completed) 
 
-## 📝 Notlar
+Database güncellenir 
 
-- **In-Memory Database**: Uygulama her yeniden başlatıldığında veriler sıfırlanır. Production ortamında SQL Server, PostgreSQL gibi gerçek bir veritabanı kullanılmalıdır.
+Test 
 
-- **RabbitMQ**: Uygulamalar başlatılmadan önce RabbitMQ'nun çalışır durumda olması gerekmektedir.
+dotnet test  
 
-- **Port Çakışması**: Eğer 5000/5001 portları kullanılıyorsa, `launchSettings.json` dosyasından port değiştirilebilir.
+Test kapsamı: 
 
-## 🚀 Production'a Hazırlık
+Repository CRUD operations 
 
-Production ortamına geçiş için yapılması gerekenler:
+Controller endpoint behaviors 
 
-1. **Gerçek Veritabanı**: SQL Server, PostgreSQL veya MongoDB kullanın
-2. **Authentication/Authorization**: JWT veya Identity Server entegrasyonu
-3. **Logging**: Serilog, Application Insights gibi profesyonel logging çözümleri
-4. **Monitoring**: Health checks, metrics collection
-5. **Error Handling**: Global exception handler
-6. **Validation**: FluentValidation kütüphanesi
-7. **Rate Limiting**: API rate limiting middleware
-8. **Caching**: Redis cache katmanı
-9. **Configuration**: Azure Key Vault veya AWS Secrets Manager
+Mapping logic 
 
-## 🐛 Sorun Giderme
+Business rules 
 
-### RabbitMQ Bağlantı Hatası
-```
-RabbitMQ.Client.Exceptions.BrokerUnreachableException
-```
-**Çözüm**: RabbitMQ'nun çalıştığından emin olun:
-```bash
-docker-compose ps
-```
+Notlar 
 
-### Port Zaten Kullanılıyor
-**Çözüm**: `launchSettings.json` dosyasından farklı bir port seçin veya çakışan uygulamayı kapatın.
+In-Memory Database: Development kolaylığı için kullanıldı. Production'da SQL Server veya PostgreSQL önerilir. 
 
-## 👨‍💻 Geliştirici
+FluentValidation: Input validation için tercih ettim. Data Annotations'a göre daha esnek ve test edilebilir. 
 
-Bu proje, e-ticaret platformları için modern bir sipariş yönetim sistemi case study'si olarak geliştirilmiştir.
+Index Stratejisi: GetAll endpoint'inde CreatedDate'e göre sıralama yaptığım için bu alana index ekledim. Bu sayede büyük veri setlerinde performans kaybı yaşanmaz. 
 
-## 📄 Lisans
+Geliştirme Süreci Hakkında 
 
-Bu proje eğitim amaçlı geliştirilmiştir.
+Bu projeyi geliştirirken şu noktalara özen gösterdim: 
 
----
+Separation of Concerns: Her katmanın sorumluluğu net şekilde ayrılmış 
 
-**Geliştirme Süresi**: 2 gün  
-**Teknoloji Stack**: .NET 9, RabbitMQ, Entity Framework Core, xUnit  
-**Mimari Pattern**: Clean Architecture
+SOLID Principles: Özellikle Dependency Inversion ve Single Responsibility 
+
+Testability: Unit test yazımını kolaylaştıracak bir yapı 
+
+Maintainability: Kodun okunabilirliği ve genişletilebilirliği 
+
+
+Geliştirme Süresi: 4 saat 
+
+Odak: Clean code, scalability, maintainability 
