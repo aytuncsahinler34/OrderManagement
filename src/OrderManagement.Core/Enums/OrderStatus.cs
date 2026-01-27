@@ -1,5 +1,6 @@
 ﻿namespace OrderManagement.Core.Enums
 {
+    //Sipariş durumu için enum
     public enum OrderStatus
     {
         Pending = 0,

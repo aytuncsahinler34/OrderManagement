@@ -1,18 +1,19 @@
-using Microsoft.EntityFrameworkCore;
+ï»¿using Microsoft.EntityFrameworkCore;
 using OrderManagement.Core.Interfaces;
 using OrderManagement.Infrastructure.Data;
 using OrderManagement.WorkerService;
+using OrderManagement.WorkerService.Configuration;
 
 var builder = Host.CreateApplicationBuilder(args);
 
-// Database - InMemory (API ile ayný instance'ý kullanmak için)
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseInMemoryDatabase("OrderManagementDb"));
 
-// Repository
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 
-// Worker Service
+builder.Services.Configure<RabbitMQOptions>(
+    builder.Configuration.GetSection(RabbitMQOptions.RabbitMQ));
+
 builder.Services.AddHostedService<OrderProcessingWorker>();
 
 var host = builder.Build();

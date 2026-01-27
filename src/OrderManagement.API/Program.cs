@@ -1,16 +1,15 @@
-using FluentValidation;
+ï»¿using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using OrderManagement.Core.Interfaces;
 using OrderManagement.Infrastructure.Data;
 using OrderManagement.Infrastructure.Message;
+using OrderManagement.API.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Services
 builder.Services.AddControllers();
 
-//FluentValidation
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddFluentValidationClientsideAdapters();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
@@ -22,22 +21,30 @@ builder.Services.AddSwaggerGen(c =>
     {
         Title = "Order Management API",
         Version = "v1",
-        Description = "Sipariþ Yönetim Sistemi REST API"
+        Description = "SipariÅŸ YÃ¶netim Sistemi REST API"
     });
 });
 
-// Database - InMemory
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseInMemoryDatabase("OrderManagementDb"));
 
-// Repository
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 
-// RabbitMQ
-var rabbitMqHost = builder.Configuration.GetValue<string>("RabbitMQ:Host") ?? "localhost";
-builder.Services.AddSingleton<IMessagePublisher>(sp => new RabbitMQPublisher(rabbitMqHost));
+builder.Services.Configure<RabbitMQOptions>(
+    builder.Configuration.GetSection(RabbitMQOptions.RabbitMQ));
 
-// CORS
+builder.Services.AddSingleton<IMessagePublisher>(sp =>
+{
+    var config = builder.Configuration.GetSection("RabbitMQ");
+
+    var host = config.GetValue<string>("Host") ?? "localhost";
+    var port = config.GetValue<int>("Port");
+    var username = config.GetValue<string>("Username") ?? "guest";
+    var password = config.GetValue<string>("Password") ?? "Qweasdzxc123";
+
+    return new RabbitMQPublisher(host, port, username, password);
+});
+
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -50,7 +57,6 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -63,4 +69,3 @@ app.MapControllers();
 
 app.Run();
 
-public partial class Program { }

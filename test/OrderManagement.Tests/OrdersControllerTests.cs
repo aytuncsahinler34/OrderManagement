@@ -27,7 +27,6 @@ public class OrdersControllerTests
     [Fact]
     public async Task CreateOrder_ShouldReturnCreatedResult_WithValidData()
     {
-        // Arrange
         var dto = new CreateOrderDto
         {
             ProductName = "Test Ürün",
@@ -42,10 +41,8 @@ public class OrdersControllerTests
             .Setup(p => p.PublishAsync(It.IsAny<Order>(), It.IsAny<string>()))
             .Returns(Task.CompletedTask);
 
-        // Act
         var result = await _controller.CreateOrder(dto);
 
-        // Assert
         var createdResult = Assert.IsType<CreatedAtActionResult>(result.Result);
         var response = Assert.IsType<OrderResponseDto>(createdResult.Value);
 
@@ -60,7 +57,6 @@ public class OrdersControllerTests
     [Fact]
     public async Task GetOrderById_ShouldReturnOk_WhenOrderExists()
     {
-        // Arrange
         var orderId = Guid.NewGuid();
         var order = new Order
         {
@@ -75,10 +71,8 @@ public class OrdersControllerTests
             .Setup(r => r.GetByIdAsync(orderId))
             .ReturnsAsync(order);
 
-        // Act
         var result = await _controller.GetOrderById(orderId);
 
-        // Assert
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
         var response = Assert.IsType<OrderResponseDto>(okResult.Value);
 
@@ -90,24 +84,20 @@ public class OrdersControllerTests
     [Fact]
     public async Task GetOrderById_ShouldReturnNotFound_WhenOrderDoesNotExist()
     {
-        // Arrange
         var orderId = Guid.NewGuid();
 
         _mockRepository
             .Setup(r => r.GetByIdAsync(orderId))
             .ReturnsAsync((Order?)null);
 
-        // Act
         var result = await _controller.GetOrderById(orderId);
 
-        // Assert
         Assert.IsType<NotFoundObjectResult>(result.Result);
     }
 
     [Fact]
     public async Task GetAllOrders_ShouldReturnOk_WithOrderList()
     {
-        // Arrange
         var orders = new List<Order>
         {
             new Order
@@ -132,10 +122,8 @@ public class OrdersControllerTests
             .Setup(r => r.GetAllAsync())
             .ReturnsAsync(orders);
 
-        // Act
         var result = await _controller.GetAllOrders();
 
-        // Assert
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
         var response = Assert.IsAssignableFrom<IEnumerable<OrderResponseDto>>(okResult.Value);
 
@@ -145,15 +133,12 @@ public class OrdersControllerTests
     [Fact]
     public async Task GetAllOrders_ShouldReturnEmptyList_WhenNoOrders()
     {
-        // Arrange
         _mockRepository
             .Setup(r => r.GetAllAsync())
             .ReturnsAsync(new List<Order>());
 
-        // Act
         var result = await _controller.GetAllOrders();
 
-        // Assert
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
         var response = Assert.IsAssignableFrom<IEnumerable<OrderResponseDto>>(okResult.Value);
 

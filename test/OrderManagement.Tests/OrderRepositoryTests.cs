@@ -23,7 +23,6 @@ public class OrderRepositoryTests : IDisposable
     [Fact]
     public async Task CreateAsync_ShouldAddOrderToDatabase()
     {
-        // Arrange
         var order = new Order
         {
             Id = Guid.NewGuid(),
@@ -33,10 +32,8 @@ public class OrderRepositoryTests : IDisposable
             CreatedDate = DateTime.UtcNow
         };
 
-        // Act
         var result = await _repository.CreateAsync(order);
 
-        // Assert
         Assert.NotNull(result);
         Assert.Equal(order.Id, result.Id);
         Assert.Equal(order.ProductName, result.ProductName);
@@ -46,7 +43,6 @@ public class OrderRepositoryTests : IDisposable
     [Fact]
     public async Task GetByIdAsync_ShouldReturnOrder_WhenOrderExists()
     {
-        // Arrange
         var order = new Order
         {
             Id = Guid.NewGuid(),
@@ -57,10 +53,8 @@ public class OrderRepositoryTests : IDisposable
         };
         await _repository.CreateAsync(order);
 
-        // Act
         var result = await _repository.GetByIdAsync(order.Id);
 
-        // Assert
         Assert.NotNull(result);
         Assert.Equal(order.Id, result.Id);
         Assert.Equal(order.ProductName, result.ProductName);
@@ -69,20 +63,16 @@ public class OrderRepositoryTests : IDisposable
     [Fact]
     public async Task GetByIdAsync_ShouldReturnNull_WhenOrderDoesNotExist()
     {
-        // Arrange
         var nonExistentId = Guid.NewGuid();
 
-        // Act
         var result = await _repository.GetByIdAsync(nonExistentId);
 
-        // Assert
         Assert.Null(result);
     }
 
     [Fact]
     public async Task GetAllAsync_ShouldReturnAllOrders()
     {
-        // Arrange
         var order1 = new Order
         {
             Id = Guid.NewGuid(),
@@ -103,10 +93,8 @@ public class OrderRepositoryTests : IDisposable
         await _repository.CreateAsync(order1);
         await _repository.CreateAsync(order2);
 
-        // Act
         var results = await _repository.GetAllAsync();
 
-        // Assert
         Assert.NotNull(results);
         Assert.Equal(2, results.Count());
     }
@@ -114,7 +102,6 @@ public class OrderRepositoryTests : IDisposable
     [Fact]
     public async Task UpdateAsync_ShouldUpdateOrderStatus()
     {
-        // Arrange
         var order = new Order
         {
             Id = Guid.NewGuid(),
@@ -125,13 +112,11 @@ public class OrderRepositoryTests : IDisposable
         };
         await _repository.CreateAsync(order);
 
-        // Act
         order.Status = OrderStatus.Completed;
         await _repository.UpdateAsync(order);
 
         var updatedOrder = await _repository.GetByIdAsync(order.Id);
 
-        // Assert
         Assert.NotNull(updatedOrder);
         Assert.Equal(OrderStatus.Completed, updatedOrder.Status);
         Assert.NotNull(updatedOrder.UpdatedDate);

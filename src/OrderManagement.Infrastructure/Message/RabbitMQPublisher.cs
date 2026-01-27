@@ -10,27 +10,28 @@ public class RabbitMQPublisher : IMessagePublisher, IDisposable
     private readonly IConnection _connection;
     private readonly IModel _channel;
 
-    public RabbitMQPublisher(string hostname = "localhost")
+    public RabbitMQPublisher(string hostname, int port, string username, string password)
     {
         var factory = new ConnectionFactory
         {
             HostName = hostname,
-            Port = 5672,
-            UserName = "guest",
-            Password = "guest"
+            Port = port,
+            UserName = username,
+            Password = password
         };
 
         _connection = factory.CreateConnection();
         _channel = _connection.CreateModel();
     }
 
+
     public Task PublishAsync<T>(T message, string queueName)
     {
         _channel.QueueDeclare(
             queue: queueName,
-            durable: true,
-            exclusive: false,
-            autoDelete: false,
+            durable: true,   
+            exclusive: false,  
+            autoDelete: false, 
             arguments: null
         );
 

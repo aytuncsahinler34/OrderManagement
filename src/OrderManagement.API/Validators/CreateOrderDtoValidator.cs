@@ -5,7 +5,7 @@ namespace OrderManagement.API.Validators;
 
 public class CreateOrderDtoValidator : AbstractValidator<CreateOrderDto>
 {
-    //burada bazı validasyon kurallarını tanımlıyoruz
+    //burada bazı örnek validasyon kurallarını tanımlıyoruz
     public CreateOrderDtoValidator()
     {
         RuleFor(x => x.ProductName)

@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using OrderManagement.Core.Entities;
 using OrderManagement.Core.Enums;
 using OrderManagement.Core.Interfaces;
+using OrderManagement.WorkerService.Configuration;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -15,14 +16,17 @@ public class OrderProcessingWorker : BackgroundService
     private IConnection? _connection;
     private IModel? _channel;
     private const string ORDER_QUEUE = "order-queue";
+    private readonly RabbitMQOptions _options;
 
     public OrderProcessingWorker(
         ILogger<OrderProcessingWorker> logger,
-        IServiceProvider serviceProvider)
+        IServiceProvider serviceProvider,
+        RabbitMQOptions options)
     {
         _logger = logger;
         _serviceProvider = serviceProvider;
         InitializeRabbitMQ();
+        _options = options;
     }
 
     private void InitializeRabbitMQ()
@@ -31,10 +35,10 @@ public class OrderProcessingWorker : BackgroundService
         {
             var factory = new ConnectionFactory
             {
-                HostName = "localhost",
-                Port = 5672,
-                UserName = "guest",
-                Password = "guest",
+                HostName = _options.Host,
+                Port = _options.Port,
+                UserName = _options.Username,
+                Password = _options.Password,
                 AutomaticRecoveryEnabled = true,
                 NetworkRecoveryInterval = TimeSpan.FromSeconds(10)
             };
@@ -52,11 +56,11 @@ public class OrderProcessingWorker : BackgroundService
 
             _channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
 
-            _logger.LogInformation("RabbitMQ bağlantısı başarılı");
+            _logger.LogInformation("RabbitMQ bağlantısı başarılı.");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "RabbitMQ bağlantısı kurulamadı");
+            _logger.LogError(ex, "RabbitMQ bağlantısı kurulamadı!");
         }
     }
 
@@ -64,7 +68,7 @@ public class OrderProcessingWorker : BackgroundService
     {
         if (_channel == null)
         {
-            _logger.LogError("RabbitMQ kanalı başlatılamadı");
+            _logger.LogError("RabbitMQ kanalı başlatılamadı!");
             return;
         }
 
@@ -93,8 +97,6 @@ public class OrderProcessingWorker : BackgroundService
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Sipariş işlenirken hata oluştu: {Message}", message);
-
-                // Hatalı mesajı reject et, tekrar kuyruğa koyma
                 _channel.BasicNack(deliveryTag: ea.DeliveryTag, multiple: false, requeue: false);
             }
         };
@@ -115,10 +117,9 @@ public class OrderProcessingWorker : BackgroundService
         using var scope = _serviceProvider.CreateScope();
         var repository = scope.ServiceProvider.GetRequiredService<IOrderRepository>();
 
-        // Simüle edilmiş işlem süresi (gerçek senaryoda ödeme, stok kontrolü vb. yapılır)
+        // Simüle edilmiş işlem süresi
         await Task.Delay(TimeSpan.FromSeconds(2));
 
-        // Siparişi güncelle
         var existingOrder = await repository.GetByIdAsync(order.Id);
 
         if (existingOrder != null)
@@ -126,7 +127,6 @@ public class OrderProcessingWorker : BackgroundService
             existingOrder.Status = OrderStatus.Processing;
             await repository.UpdateAsync(existingOrder);
 
-            // İşlem tamamlandı
             await Task.Delay(TimeSpan.FromSeconds(1));
 
             existingOrder.Status = OrderStatus.Completed;

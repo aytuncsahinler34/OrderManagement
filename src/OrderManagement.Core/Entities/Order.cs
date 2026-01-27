@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using OrderManagement.Core.Enums;
+﻿using OrderManagement.Core.Enums;
 
 namespace OrderManagement.Core.Entities
 {
