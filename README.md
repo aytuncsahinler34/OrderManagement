@@ -38,7 +38,7 @@ RabbitMQ Başlatma
 
 docker-compose up -d  
 
-RabbitMQ Management: http://localhost:15672 (guest/guest) 
+RabbitMQ Management: http://localhost:15672 (guest/Qweasdzxc123) 
 
 Uygulamayı Çalıştırma 
 
